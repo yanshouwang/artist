@@ -74,3 +74,8 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+  assets:
+    - images/xiaoice.jpg
+    - images/right_chat.png
+    - images/shoot.png

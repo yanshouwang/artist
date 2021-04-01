@@ -11,7 +11,7 @@ class Paper extends StatelessWidget {
     return Container(
       color: Colors.white,
       child: FutureBuilder(
-        future: loadImageFromAssetsAsync('images/shoot.png'),
+        future: loadImageFromAssetsAsync('#images/shoot.png'),
         builder: (context, AsyncSnapshot<ui.Image> snapshot) => snapshot.hasData
             ? CustomPaint(painter: GraphicPainter(snapshot.data!))
             : CustomPaint(painter: SimplePainter()),
@@ -189,6 +189,37 @@ extension CanvasX on Canvas {
       ..style = PaintingStyle.stroke;
     drawLine(p1, p2, paint);
   }
+
+  void drawGridsPath(Size size) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5
+      ..color = Colors.grey;
+    final width = size.width / 2.0;
+    final height = size.height / 2.0;
+    final step = 20.0;
+    final horizontalCount = size.height / step;
+    final verticalCount = size.width / step;
+    // final path = Path()
+    //   ..moveTo(-width, 0.0)
+    //   ..lineTo(width, 0.0)
+    //   ..moveTo(0.0, -height)
+    //   ..lineTo(0.0, height);
+    final path = Path();
+    for (var i = 1; i < horizontalCount; i++) {
+      path.moveTo(-width, i * step);
+      path.relativeLineTo(size.width, 0.0);
+      path.moveTo(-width, -i * step);
+      path.relativeLineTo(size.width, 0.0);
+    }
+    for (var i = 1; i < verticalCount; i++) {
+      path.moveTo(i * step, -height);
+      path.relativeLineTo(0.0, size.height);
+      path.moveTo(-i * step, -height);
+      path.relativeLineTo(0.0, size.height);
+    }
+    drawPath(path, paint);
+  }
 }
 
 class SimplePainter extends CustomPainter {
@@ -202,8 +233,10 @@ class SimplePainter extends CustomPainter {
     //drawInvertColors(canvas);
     canvas.center(size);
     //canvas.drawBottomRightGrids(size);
-    canvas.drawGrids(size);
+    //canvas.drawGrids(size);
+    canvas.drawGridsPath(size);
     canvas.drawAxis(size);
+    canvas.drawMarks(size);
     //canvas.drawItems();
     //drawDots(canvas);
     //drawRawPoints(canvas);
@@ -219,6 +252,21 @@ class SimplePainter extends CustomPainter {
     //clipRect(canvas, size);
     //clipRRect(canvas, size);
     //clipPath(canvas, size);
+    //moveToAndLineTo(canvas);
+    //relativeMoveToAndLineTo(canvas);
+    //arcTo(canvas);
+    //arcToPointAndRelativeArcToPoint(canvas);
+    //conicToAndRelativeConicTo(canvas);
+    //quadraticBezierToAndRelativeQuadraticBezierTo(canvas);
+    //cubicToAndRelativeCubicTo(canvas);
+    //addRectAndAddRRect(canvas);
+    //addOvalAndAddArc(canvas);
+    //addPolygonAndAddPath(canvas);
+    //closeAndResetAndShift(canvas);
+    //containsAndGetBounds(canvas);
+    //transform(canvas);
+    //combine(canvas);
+    computeMetrics(canvas);
   }
 
   @override
@@ -609,6 +657,371 @@ extension SimpleX2 on SimplePainter {
     canvas.clipPath(path);
     canvas.drawColor(Colors.red, BlendMode.darken);
     canvas.restore();
+  }
+}
+
+extension SimpleX3 on SimplePainter {
+  void moveToAndLineTo(Canvas canvas) {
+    final path = Path()
+      ..moveTo(0.0, 0.0)
+      ..lineTo(60.0, 80.0)
+      ..lineTo(60.0, 0.0)
+      ..lineTo(0.0, -80.0)
+      ..close();
+    final paint = Paint()
+      ..color = Colors.deepPurpleAccent
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(path, paint);
+
+    path
+      ..moveTo(0.0, 0.0)
+      ..lineTo(-60.0, 80.0)
+      ..lineTo(-60.0, 0.0)
+      ..lineTo(0.0, -80.0)
+      ..close();
+    paint
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    canvas.drawPath(path, paint);
+  }
+
+  void relativeMoveToAndLineTo(Canvas canvas) {
+    final path = Path()
+      ..relativeMoveTo(0.0, 0.0)
+      ..relativeLineTo(100.0, 120.0)
+      ..relativeLineTo(-12.0, -60.0)
+      ..relativeLineTo(60.0, -8.0)
+      ..close();
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = Colors.green;
+    canvas.drawPath(path, paint);
+
+    path
+      ..reset()
+      ..relativeMoveTo(-200.0, 0.0)
+      ..relativeLineTo(100.0, 120.0)
+      ..relativeLineTo(-12.0, -60.0)
+      ..relativeLineTo(60.0, -8.0)
+      ..close();
+    paint
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    canvas.drawPath(path, paint);
+  }
+
+  void arcTo(Canvas canvas) {
+    final rect =
+        Rect.fromCenter(center: Offset.zero, width: 160.0, height: 100.0);
+    final path = Path()
+      ..lineTo(32.0, 32.0)
+      ..arcTo(rect, 0.0, 1.5 * pi, true);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..color = Colors.purpleAccent;
+    canvas.drawPath(path, paint);
+
+    canvas.save();
+    canvas.translate(200.0, 0.0);
+    path
+      ..reset()
+      ..lineTo(32.0, 32.0)
+      ..arcTo(rect, 0.0, 1.5 * pi, false);
+    canvas.drawPath(path, paint);
+    canvas.restore();
+  }
+
+  void arcToPointAndRelativeArcToPoint(Canvas canvas) {
+    canvas.save();
+    canvas.translate(0.0, -160.0);
+    final arcEnd = Offset(40.0, 40.0);
+    final radius = Radius.circular(60.0);
+    final path = Path()
+      ..lineTo(80.0, -40.0)
+      ..arcToPoint(
+        arcEnd,
+        radius: radius,
+        largeArc: false,
+        clockwise: true,
+      )
+      ..close();
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..color = Colors.purpleAccent;
+    canvas.drawPath(path, paint);
+    canvas.restore();
+
+    canvas.save();
+    canvas.translate(0.0, 160.0);
+    path
+      ..reset()
+      ..lineTo(80.0, -40.0)
+      ..arcToPoint(
+        arcEnd,
+        radius: radius,
+        largeArc: false,
+        clockwise: false,
+      )
+      ..close();
+    canvas.drawPath(path, paint);
+    canvas.restore();
+
+    canvas.save();
+    canvas.translate(-160.0, 0.0);
+    path
+      ..reset()
+      ..lineTo(80.0, -40.0)
+      ..arcToPoint(
+        arcEnd,
+        radius: radius,
+        largeArc: true,
+        clockwise: false,
+      )
+      ..close();
+    canvas.drawPath(path, paint);
+    canvas.restore();
+
+    canvas.save();
+    canvas.translate(160.0, 0.0);
+    path
+      ..reset()
+      ..lineTo(80.0, -40.0)
+      ..arcToPoint(
+        arcEnd,
+        radius: radius,
+        largeArc: true,
+        clockwise: true,
+      )
+      ..close();
+    canvas.drawPath(path, paint);
+    canvas.restore();
+  }
+
+  void conicToAndRelativeConicTo(Canvas canvas) {
+    final path = Path()..conicTo(80.0, -100.0, 160.0, 0.0, 1.0);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..color = Colors.purpleAccent;
+    canvas.drawPath(path, paint);
+
+    canvas.save();
+    canvas.translate(-200.0, 0.0);
+    path
+      ..reset()
+      ..conicTo(80.0, -100.0, 160.0, 0.0, 0.5);
+    canvas.drawPath(path, paint);
+    canvas.restore();
+
+    canvas.save();
+    canvas.translate(200.0, 0.0);
+    path
+      ..reset()
+      ..conicTo(80.0, -100.0, 160.0, 0.0, 1.5);
+    canvas.drawPath(path, paint);
+    canvas.restore();
+  }
+
+  void quadraticBezierToAndRelativeQuadraticBezierTo(Canvas canvas) {
+    final path = Path()
+      ..quadraticBezierTo(100.0, -100.0, 160.0, 40.0)
+      ..relativeQuadraticBezierTo(100.0, -100.0, 160.0, 40.0);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..color = Colors.purpleAccent;
+    canvas.drawPath(path, paint);
+  }
+
+  void cubicToAndRelativeCubicTo(Canvas canvas) {
+    final path = Path()
+      ..cubicTo(80.0, -100.0, 100.0, 80.0, 160.0, 60.0)
+      ..relativeCubicTo(80.0, -100.0, 100.0, 80.0, 160.0, 60.0);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..color = Colors.purpleAccent;
+    canvas.drawPath(path, paint);
+  }
+
+  void addRectAndAddRRect(Canvas canvas) {
+    final a = Offset(100.0, 100.0);
+    final b = Offset(160.0, 160.0);
+    final rect = Rect.fromPoints(a, b);
+    final rrect = RRect.fromRectXY(rect.translate(100.0, -100.0), 12.0, 12.0);
+    final path = Path()
+      ..lineTo(100.0, 100.0)
+      ..addRect(rect)
+      ..relativeLineTo(100.0, -100.0)
+      ..addRRect(rrect);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..color = Colors.purpleAccent;
+    canvas.drawPath(path, paint);
+  }
+
+  void addOvalAndAddArc(Canvas canvas) {
+    final a = Offset(100.0, 100.0);
+    final b = Offset(160.0, 140.0);
+    final oval1 = Rect.fromPoints(a, b);
+    final oval2 = oval1.translate(160.0, -100.0);
+    final path = Path()
+      ..lineTo(100.0, 100.0)
+      ..addOval(oval1)
+      ..relativeLineTo(100.0, -100.0)
+      ..addArc(oval2, 0.0, pi);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..color = Colors.purpleAccent;
+    canvas.drawPath(path, paint);
+  }
+
+  void addPolygonAndAddPath(Canvas canvas) {
+    final path0 = Path()..relativeQuadraticBezierTo(125.0, -100.0, 260.0, 0.0);
+    final point = Offset(100.0, 100.0);
+    final points = <Offset>[
+      point,
+      point.translate(20.0, -20.0),
+      point.translate(40, -20),
+      point.translate(60, 0),
+      point.translate(60, 20),
+      point.translate(40, 40),
+      point.translate(20, 40),
+      point.translate(0, 20),
+    ];
+    final path1 = Path()
+      ..lineTo(100.0, 100.0)
+      ..addPolygon(points, true)
+      ..addPath(path0, Offset.zero)
+      ..lineTo(160.0, 100.0);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..color = Colors.purpleAccent;
+    canvas.drawPath(path1, paint);
+  }
+}
+
+extension SimpleX4 on SimplePainter {
+  void closeAndResetAndShift(Canvas canvas) {
+    final path1 = Path()
+      ..lineTo(100.0, 100.0)
+      ..relativeLineTo(0.0, -50.0)
+      ..close();
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..color = Colors.purpleAccent;
+    canvas.drawPath(path1, paint);
+    final offset = Offset(100.0, 0.0);
+    final path2 = path1.shift(offset);
+    canvas.drawPath(path2, paint);
+    final path3 = path2.shift(offset);
+    canvas.drawPath(path3, paint);
+  }
+
+  void containsAndGetBounds(Canvas canvas) {
+    final path = Path()
+      ..relativeLineTo(-32.0, 120.0)
+      ..relativeLineTo(32.0, -32.0)
+      ..relativeLineTo(32.0, 32.0)
+      ..close();
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = Colors.purple;
+    canvas.drawPath(path, paint);
+
+    final point1 = Offset(20.0, 20.0);
+    final judgement1 = path.contains(point1);
+    print(judgement1);
+    final point2 = Offset(0.0, 20.0);
+    final judgement2 = path.contains(point2);
+    print(judgement2);
+
+    final bounds = path.getBounds();
+    paint
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = Colors.orange;
+    canvas.drawRect(bounds, paint);
+  }
+
+  void transform(Canvas canvas) {
+    final path = Path()
+      ..relativeLineTo(-32.0, 120.0)
+      ..relativeLineTo(32.0, -32.0)
+      ..relativeLineTo(32.0, 32.0)
+      ..close();
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = Colors.purple;
+    for (var i = 0; i < 8; i++) {
+      final matrix4 = Matrix4.rotationZ(i * pi / 4.0).storage;
+      final transform = path.transform(matrix4);
+      canvas.drawPath(transform, paint);
+    }
+  }
+
+  void combine(Canvas canvas) {
+    final path1 = Path()
+      ..relativeLineTo(-32.0, 120.0)
+      ..relativeLineTo(32.0, -32.0)
+      ..relativeLineTo(32.0, 32.0)
+      ..close();
+    final oval =
+        Rect.fromCenter(center: Offset.zero, width: 60.0, height: 60.0);
+    final path2 = Path()..addOval(oval);
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = Colors.purple;
+    final combined1 = Path.combine(PathOperation.difference, path1, path2);
+    canvas.drawPath(combined1, paint);
+    canvas.save();
+    canvas.translate(120.0, 0.0);
+    final combined2 = Path.combine(PathOperation.intersect, path1, path2);
+    canvas.drawPath(combined2, paint);
+    canvas.translate(120.0, 0.0);
+    final combined3 =
+        Path.combine(PathOperation.reverseDifference, path1, path2);
+    canvas.drawPath(combined3, paint);
+    canvas.restore();
+    canvas.save();
+    canvas.translate(-120.0, 0.0);
+    final combined4 = Path.combine(PathOperation.union, path1, path2);
+    canvas.drawPath(combined4, paint);
+    canvas.translate(-120.0, 0.0);
+    final combined5 = Path.combine(PathOperation.xor, path1, path2);
+    canvas.drawPath(combined5, paint);
+    canvas.restore();
+  }
+
+  void computeMetrics(Canvas canvas) {
+    final oval =
+        Rect.fromCenter(center: Offset.zero, width: 60.0, height: 60.0);
+    final path = Path()
+      ..relativeLineTo(-32.0, 120.0)
+      ..relativeLineTo(32.0, -32.0)
+      ..relativeLineTo(32.0, 32.0)
+      ..close()
+      ..addOval(oval);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = Colors.purpleAccent;
+    canvas.drawPath(path, paint);
+    paint
+      ..style = PaintingStyle.fill
+      ..color = Colors.deepOrange;
+    final metrics = path.computeMetrics();
+    for (var metric in metrics) {
+      print(metric);
+      final tangent = metric.getTangentForOffset(metric.length * 0.5);
+      canvas.drawCircle(tangent!.position, 4.0, paint);
+    }
   }
 }
 

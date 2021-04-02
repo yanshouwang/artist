@@ -5,18 +5,42 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class Paper extends StatelessWidget {
+class Paper extends StatefulWidget {
+  @override
+  _PaperState createState() => _PaperState();
+}
+
+class _PaperState extends State<Paper> with SingleTickerProviderStateMixin {
+  AnimationController? controller;
+
+  @override
+  void initState() {
+    super.initState();
+    final duration = Duration(seconds: 3);
+    controller = AnimationController(duration: duration, vsync: this)..repeat();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      child: FutureBuilder(
-        future: loadImageFromAssetsAsync('#images/shoot.png'),
-        builder: (context, AsyncSnapshot<ui.Image> snapshot) => snapshot.hasData
-            ? CustomPaint(painter: GraphicPainter(snapshot.data!))
-            : CustomPaint(painter: SimplePainter()),
-      ),
+      child: CustomPaint(painter: SimplePainter(controller!)),
     );
+    // return Container(
+    //   color: Colors.white,
+    //   child: FutureBuilder(
+    //     future: loadImageFromAssetsAsync('images/shoot.png'),
+    //     builder: (context, AsyncSnapshot<ui.Image> snapshot) => snapshot.hasData
+    //         ? CustomPaint(painter: GraphicPainter(snapshot.data!))
+    //         : CustomPaint(painter: SimplePainter()),
+    //   ),
+    // );
+  }
+
+  @override
+  void dispose() {
+    controller!.dispose();
+    super.dispose();
   }
 }
 
@@ -223,6 +247,10 @@ extension CanvasX on Canvas {
 }
 
 class SimplePainter extends CustomPainter {
+  final Animation<double> animation;
+
+  SimplePainter(this.animation) : super(repaint: animation);
+
   @override
   void paint(Canvas canvas, Size size) {
     //drawAntiAlias(canvas);
@@ -266,7 +294,7 @@ class SimplePainter extends CustomPainter {
     //containsAndGetBounds(canvas);
     //transform(canvas);
     //combine(canvas);
-    computeMetrics(canvas);
+    computeMetrics(canvas, animation.value);
   }
 
   @override
@@ -999,7 +1027,7 @@ extension SimpleX4 on SimplePainter {
     canvas.restore();
   }
 
-  void computeMetrics(Canvas canvas) {
+  void computeMetrics(Canvas canvas, double distance) {
     final oval =
         Rect.fromCenter(center: Offset.zero, width: 60.0, height: 60.0);
     final path = Path()
@@ -1019,7 +1047,7 @@ extension SimpleX4 on SimplePainter {
     final metrics = path.computeMetrics();
     for (var metric in metrics) {
       print(metric);
-      final tangent = metric.getTangentForOffset(metric.length * 0.5);
+      final tangent = metric.getTangentForOffset(metric.length * distance);
       canvas.drawCircle(tangent!.position, 4.0, paint);
     }
   }

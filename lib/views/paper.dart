@@ -22,19 +22,19 @@ class _PaperState extends State<Paper> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: CustomPaint(painter: SimplePainter(controller!)),
-    );
     // return Container(
     //   color: Colors.white,
-    //   child: FutureBuilder(
-    //     future: loadImageFromAssetsAsync('images/shoot.png'),
-    //     builder: (context, AsyncSnapshot<ui.Image> snapshot) => snapshot.hasData
-    //         ? CustomPaint(painter: GraphicPainter(snapshot.data!))
-    //         : CustomPaint(painter: SimplePainter()),
-    //   ),
+    //   child: CustomPaint(painter: SimplePainter(controller!)),
     // );
+    return Container(
+      color: Colors.white,
+      child: FutureBuilder(
+        future: loadImageFromAssetsAsync('images/shoot.png'),
+        builder: (context, AsyncSnapshot<ui.Image> snapshot) => snapshot.hasData
+            ? CustomPaint(painter: GraphicPainter(snapshot.data!))
+            : CustomPaint(painter: SimplePainter(controller!)),
+      ),
+    );
   }
 
   @override
@@ -249,7 +249,7 @@ extension CanvasX on Canvas {
 class SimplePainter extends CustomPainter {
   final Animation<double> animation;
 
-  SimplePainter(this.animation) : super(repaint: animation);
+  SimplePainter(this.animation) : super();
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -294,7 +294,8 @@ class SimplePainter extends CustomPainter {
     //containsAndGetBounds(canvas);
     //transform(canvas);
     //combine(canvas);
-    computeMetrics(canvas, animation.value);
+    //computeMetrics(canvas, animation.value);
+    colorMatrix(canvas);
   }
 
   @override
@@ -1053,13 +1054,31 @@ extension SimpleX4 on SimplePainter {
   }
 }
 
+extension SimpleX5 on SimplePainter {
+  void colorMatrix(Canvas canvas) {
+    final colors = List.generate(256, (i) => Color.fromARGB(i, 255, 0, 0));
+    final step = 20.0;
+    final x0 = -8.0 * step;
+    final y0 = -8.0 * step;
+    final paint = Paint()..style = PaintingStyle.fill;
+    for (var i = 0; i < colors.length; i++) {
+      final x = x0 + (i % 16) * step;
+      final y = y0 + (i ~/ 16) * step;
+      final rect = Rect.fromLTWH(x, y, step, step);
+      final color = colors[i];
+      paint.color = color;
+      canvas.drawRect(rect, paint);
+    }
+  }
+}
+
 class GraphicPainter extends CustomPainter {
   final ui.Image image;
 
   GraphicPainter(this.image);
 
   @override
-  void paint(ui.Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size) {
     canvas.center(size);
     canvas.drawGrids(size);
     canvas.drawAxis(size);
@@ -1071,13 +1090,14 @@ class GraphicPainter extends CustomPainter {
     //drawParagraph(canvas, TextAlign.right);
     //textPainter(canvas);
     //textPainterStyle(canvas);
+    blendMode(canvas);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-extension GraphicX on GraphicPainter {
+extension GraphicX1 on GraphicPainter {
   void drawImage(Canvas canvas) {
     final dx = -image.width / 2.0;
     final dy = -image.height / 2.0;
@@ -1222,6 +1242,17 @@ extension GraphicX on GraphicPainter {
       ..style = PaintingStyle.fill
       ..color = Colors.blue.withAlpha(32);
     canvas.drawRect(rect, paint);
+  }
+}
+
+extension GraphicX2 on GraphicPainter {
+  void blendMode(Canvas canvas) {
+    final srcPaint = Paint();
+    final dstPaint = Paint();
+    final modes = BlendMode.values;
+    for (var i = 0; i < modes.length; i++) {
+      final mode = modes[i];
+    }
   }
 }
 

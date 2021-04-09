@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'package:image/image.dart' as im;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,12 +27,23 @@ class _PaperState extends State<Paper> with SingleTickerProviderStateMixin {
     //   color: Colors.white,
     //   child: CustomPaint(painter: SimplePainter(controller!)),
     // );
+
+    // return Container(
+    //   color: Colors.white,
+    //   child: FutureBuilder(
+    //     future: loadImage1Async('images/wy_vertical.jpg'),
+    //     builder: (context, AsyncSnapshot<ui.Image> snapshot) => snapshot.hasData
+    //         ? CustomPaint(painter: Image1Painter(snapshot.data!))
+    //         : CustomPaint(painter: SimplePainter(controller!)),
+    //   ),
+    // );
+
     return Container(
       color: Colors.white,
       child: FutureBuilder(
-        future: loadImageFromAssetsAsync('images/shoot.png'),
-        builder: (context, AsyncSnapshot<ui.Image> snapshot) => snapshot.hasData
-            ? CustomPaint(painter: GraphicPainter(snapshot.data!))
+        future: loadImage2Async('images/xiaoice.jpg'),
+        builder: (context, AsyncSnapshot<im.Image> snapshot) => snapshot.hasData
+            ? CustomPaint(painter: Image2Painter(snapshot.data!))
             : CustomPaint(painter: SimplePainter(controller!)),
       ),
     );
@@ -295,7 +307,10 @@ class SimplePainter extends CustomPainter {
     //transform(canvas);
     //combine(canvas);
     //computeMetrics(canvas, animation.value);
-    colorMatrix(canvas);
+    //colorMatrix(canvas);
+    //drawLinearShader(canvas);
+    //drawRadialShader(canvas);
+    drawSweepShader(canvas);
   }
 
   @override
@@ -1072,10 +1087,160 @@ extension SimpleX5 on SimplePainter {
   }
 }
 
-class GraphicPainter extends CustomPainter {
+extension SimpleX6 on SimplePainter {
+  void drawLinearShader(Canvas canvas) {
+    final step = 20.0;
+    final width = step * 10.0;
+    final height = step * 2.0;
+    final colors = [
+      Colors.red,
+      Colors.orange,
+      Colors.yellow,
+      Colors.green,
+      Colors.blue,
+      Colors.indigo,
+      Colors.purple,
+    ];
+    final stops = [1.0 / 7, 2.0 / 7, 3.0 / 7, 4.0 / 7, 5.0 / 7, 6.0 / 7, 1.0];
+    final shader1 = ui.Gradient.linear(
+        Offset.zero, Offset(width / 2.0, 0.0), colors, stops);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = height
+      ..shader = shader1;
+    final from = Offset.zero;
+    final to = from.translate(width, 0.0);
+    canvas.save();
+    canvas.translate(-width / 2.0, -(height + step) * 6.0 / 2.0);
+    canvas.drawLine(from, to, paint);
+    canvas.translate(0.0, height + step);
+    final shader2 = ui.Gradient.linear(
+        Offset.zero, Offset(width / 2.0, 0.0), colors, stops, TileMode.decal);
+    paint.shader = shader2;
+    canvas.drawLine(from, to, paint);
+    canvas.translate(0.0, height + step);
+    final shader3 = ui.Gradient.linear(
+        Offset.zero, Offset(width / 2.0, 0.0), colors, stops, TileMode.mirror);
+    paint.shader = shader3;
+    canvas.drawLine(from, to, paint);
+    canvas.translate(0.0, height + step);
+    final shader4 = ui.Gradient.linear(Offset.zero, Offset(width / 2.0, 0.0),
+        colors, stops, TileMode.repeated);
+    paint.shader = shader4;
+    canvas.drawLine(from, to, paint);
+    canvas.translate(0.0, height + step);
+    final matrix5 = Matrix4.rotationZ(pi / 4.0).storage;
+    final shader5 = ui.Gradient.linear(Offset.zero, Offset(width / 2.0, 0.0),
+        colors, stops, TileMode.clamp, matrix5);
+    paint.shader = shader5;
+    canvas.drawLine(from, to, paint);
+    canvas.translate(0.0, height + step);
+    final matrix6 = Matrix4.translationValues(step, 0.0, 0.0).storage;
+    final shader6 = ui.Gradient.linear(Offset.zero, Offset(width / 2.0, 0.0),
+        colors, stops, TileMode.clamp, matrix6);
+    paint.shader = shader6;
+    canvas.drawLine(from, to, paint);
+    canvas.translate(0.0, height + step);
+    final matrix7 = Matrix4.skewX(-pi / 4.0).storage;
+    final shader7 = ui.Gradient.linear(Offset.zero, Offset(width / 2.0, 0.0),
+        colors, stops, TileMode.clamp, matrix7);
+    paint.shader = shader7;
+    canvas.drawLine(from, to, paint);
+    canvas.restore();
+  }
+
+  void drawRadialShader(Canvas canvas) {
+    final step = 20.0;
+    canvas.save();
+    canvas.translate(-step * 15.0, -step * 5.0);
+    final colors = [
+      Colors.red,
+      Colors.orange,
+      Colors.yellow,
+      Colors.green,
+      Colors.blue,
+      Colors.indigo,
+      Colors.purple,
+    ];
+    final stops = [1.0 / 7, 2.0 / 7, 3.0 / 7, 4.0 / 7, 5.0 / 7, 6.0 / 7, 1.0];
+    final shader1 = ui.Gradient.radial(Offset.zero, step * 2.0, colors, stops);
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..shader = shader1;
+    canvas.drawCircle(Offset.zero, step * 4.0, paint);
+    canvas.translate(step * 10.0, 0.0);
+    final shader2 = ui.Gradient.radial(
+        Offset.zero, step * 2.0, colors, stops, TileMode.decal);
+    paint.shader = shader2;
+    canvas.drawCircle(Offset.zero, step * 4.0, paint);
+    canvas.translate(step * 10.0, 0.0);
+    final shader3 = ui.Gradient.radial(
+        Offset.zero, step * 2.0, colors, stops, TileMode.mirror);
+    paint.shader = shader3;
+    canvas.drawCircle(Offset.zero, step * 4.0, paint);
+    canvas.translate(step * 10.0, 0.0);
+    final shader4 = ui.Gradient.radial(
+        Offset.zero, step * 2.0, colors, stops, TileMode.repeated);
+    paint.shader = shader4;
+    canvas.drawCircle(Offset.zero, step * 4.0, paint);
+    canvas.translate(-step * 30.0, step * 10.0);
+    final focal5 = Offset(step, step);
+    final shader5 = ui.Gradient.radial(
+        Offset.zero, step * 2.0, colors, stops, TileMode.mirror, null, focal5);
+    paint.shader = shader5;
+    canvas.drawCircle(Offset.zero, step * 4.0, paint);
+    canvas.translate(step * 10.0, 0.0);
+    final focal6 = Offset(-step, -step);
+    final shader6 = ui.Gradient.radial(Offset.zero, step * 2.0, colors, stops,
+        TileMode.mirror, null, focal6, 4.0);
+    paint.shader = shader6;
+    canvas.drawCircle(Offset.zero, step * 4.0, paint);
+    canvas.restore();
+  }
+
+  void drawSweepShader(Canvas canvas) {
+    final step = 20.0;
+    canvas.save();
+    canvas.translate(-step * 15.0, 0.0);
+    final colors = [
+      Colors.red,
+      Colors.orange,
+      Colors.yellow,
+      Colors.green,
+      Colors.blue,
+      Colors.indigo,
+      Colors.purple,
+    ];
+    final stops = [1.0 / 7, 2.0 / 7, 3.0 / 7, 4.0 / 7, 5.0 / 7, 6.0 / 7, 1.0];
+    final shader1 = ui.Gradient.sweep(
+        Offset.zero, colors, stops, TileMode.clamp, pi / 2.0, pi);
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..shader = shader1;
+    canvas.drawCircle(Offset.zero, step * 4.0, paint);
+    canvas.translate(step * 10.0, 0.0);
+    final shader2 = ui.Gradient.sweep(
+        Offset.zero, colors, stops, TileMode.decal, pi / 2.0, pi);
+    paint.shader = shader2;
+    canvas.drawCircle(Offset.zero, step * 4.0, paint);
+    canvas.translate(step * 10.0, 0.0);
+    final shader3 = ui.Gradient.sweep(
+        Offset.zero, colors, stops, TileMode.mirror, pi / 2.0, pi);
+    paint.shader = shader3;
+    canvas.drawCircle(Offset.zero, step * 4.0, paint);
+    canvas.translate(step * 10.0, 0.0);
+    final shader4 = ui.Gradient.sweep(
+        Offset.zero, colors, stops, TileMode.repeated, pi / 2.0, pi);
+    paint.shader = shader4;
+    canvas.drawCircle(Offset.zero, step * 4.0, paint);
+    canvas.restore();
+  }
+}
+
+class Image1Painter extends CustomPainter {
   final ui.Image image;
 
-  GraphicPainter(this.image);
+  Image1Painter(this.image);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1090,14 +1255,15 @@ class GraphicPainter extends CustomPainter {
     //drawParagraph(canvas, TextAlign.right);
     //textPainter(canvas);
     //textPainterStyle(canvas);
-    blendMode(canvas);
+    //blendMode(canvas);
+    colorFilter(canvas);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-extension GraphicX1 on GraphicPainter {
+extension Image1X1 on Image1Painter {
   void drawImage(Canvas canvas) {
     final dx = -image.width / 2.0;
     final dy = -image.height / 2.0;
@@ -1245,14 +1411,239 @@ extension GraphicX1 on GraphicPainter {
   }
 }
 
-extension GraphicX2 on GraphicPainter {
+extension Image1X2 on Image1Painter {
   void blendMode(Canvas canvas) {
-    final srcPaint = Paint();
     final dstPaint = Paint();
+    final srcPaint = Paint()..color = Color(0xffff0000);
     final modes = BlendMode.values;
+    final step = 20.0;
+    final columns = 7;
+    final rows = (modes.length / columns).ceil();
+    final x0 = -(columns * 6 - 2) * step / 2.0;
+    final y0 = -(rows * 8 - 4) * step / 2.0;
     for (var i = 0; i < modes.length; i++) {
       final mode = modes[i];
+      canvas.save();
+      final x = x0 + (i % columns) * step * 6;
+      final y = y0 + (i ~/ columns) * step * 8;
+      canvas.translate(x, y);
+      final b1 = Offset(image.width.toDouble(), image.height.toDouble());
+      final src = Rect.fromPoints(Offset.zero, b1);
+      final b2 = Offset(step * 4.0, step * 4.0);
+      final dst = Rect.fromPoints(Offset.zero, b2);
+      canvas.drawImageRect(image, src, dst, dstPaint);
+      srcPaint.blendMode = mode;
+      final rect =
+          Rect.fromLTWH(step * 2.0, step * 2.0, step * 2.0, step * 2.0);
+      canvas.drawRect(rect, srcPaint);
+      final modePainter = TextPainter(
+        text: TextSpan(
+          text: '$mode'.split('.').last,
+          style: TextStyle(fontSize: 20.0, color: Colors.black),
+        ),
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      );
+      modePainter.layout();
+      final size = modePainter.size;
+      final dx = step * 2.0 - size.width / 2.0;
+      final dy = step * 5.0 - size.height / 2.0;
+      final offset = Offset(dx, dy);
+      modePainter.paint(canvas, offset);
+      canvas.restore();
     }
+  }
+}
+
+extension Image1X3 on Image1Painter {
+  void colorFilter(Canvas canvas) {
+    canvas.save();
+    final step = 20.0;
+    final b1 = Offset(image.width.toDouble(), image.height.toDouble());
+    final src = Rect.fromPoints(Offset.zero, b1);
+    final b2 = Offset(8.0 * step, 10.0 * step);
+    final dst = Rect.fromPoints(Offset.zero, b2);
+    final colorFilter1 = ColorFilter.linearToSrgbGamma();
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..colorFilter = colorFilter1;
+    canvas.translate(-19.0 * step, -11.0 * step);
+    canvas.drawImageRect(image, src, dst, paint);
+    canvas.translate(10.0 * step, 0.0);
+    final colorFilter2 = ColorFilter.mode(Colors.yellow, BlendMode.modulate);
+    paint.colorFilter = colorFilter2;
+    canvas.drawImageRect(image, src, dst, paint);
+    canvas.translate(10.0 * step, 0.0);
+    final colorFilter3 = ColorFilter.mode(Colors.yellow, BlendMode.difference);
+    paint.colorFilter = colorFilter3;
+    canvas.drawImageRect(image, src, dst, paint);
+    canvas.translate(10.0 * step, 0.0);
+    final colorFilter4 = ColorFilter.mode(Colors.yellow, BlendMode.plus);
+    paint.colorFilter = colorFilter4;
+    canvas.drawImageRect(image, src, dst, paint);
+    canvas.translate(-30.0 * step, 12.0 * step);
+    final matrix5 = [
+      -1.0,
+      0.0,
+      0.0,
+      0.0,
+      255.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+    ];
+    final colorFilter5 = ColorFilter.matrix(matrix5);
+    paint.colorFilter = colorFilter5;
+    canvas.drawImageRect(image, src, dst, paint);
+    canvas.translate(10.0 * step, 0.0);
+    final matrix6 = [
+      -1.0,
+      0.0,
+      0.0,
+      0.0,
+      255.0,
+      0.0,
+      -1.0,
+      0.0,
+      0.0,
+      255.0,
+      0.0,
+      0.0,
+      -1.0,
+      0.0,
+      255.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+    ];
+    final colorFilter6 = ColorFilter.matrix(matrix6);
+    paint.colorFilter = colorFilter6;
+    canvas.drawImageRect(image, src, dst, paint);
+    canvas.translate(10.0 * step, 0.0);
+    final matrix7 = [
+      0.2126,
+      0.7152,
+      0.0722,
+      0.0,
+      0.0,
+      0.2126,
+      0.7152,
+      0.0722,
+      0.0,
+      0.0,
+      0.2126,
+      0.7152,
+      0.0722,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+    ];
+    final colorFilter7 = ColorFilter.matrix(matrix7);
+    paint.colorFilter = colorFilter7;
+    canvas.drawImageRect(image, src, dst, paint);
+    canvas.translate(10.0 * step, 0.0);
+    final matrix8 = [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      90.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      90.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      90.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+    ];
+    final colorFilter8 = ColorFilter.matrix(matrix8);
+    paint.colorFilter = colorFilter8;
+    canvas.drawImageRect(image, src, dst, paint);
+    canvas.restore();
+  }
+}
+
+class Image2Painter extends CustomPainter {
+  final im.Image image;
+
+  Image2Painter(this.image);
+
+  @override
+  void paint(ui.Canvas canvas, ui.Size size) {
+    canvas.center(size);
+    canvas.drawGrids(size);
+    canvas.drawAxis(size);
+    canvas.drawMarks(size);
+    //drawImageColor(canvas);
+    drawImagePixelCircles(canvas);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+}
+
+extension Image2X1 on Image2Painter {
+  void drawImageColor(Canvas canvas) {
+    final value = image.getPixel(image.width, 0);
+    final color1 = Color(value);
+    final color2 =
+        Color.fromARGB(color1.alpha, color1.blue, color1.green, color1.red);
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = color2;
+    canvas.drawCircle(Offset.zero, 12.0, paint);
+  }
+
+  void drawImagePixelCircles(Canvas canvas) {
+    final step = 8.0;
+    final radius = step / 2.0;
+    final paint = Paint()..style = PaintingStyle.fill;
+    canvas.save();
+    canvas.translate(-image.width * step / 2.0, -image.height * step / 2.0);
+    for (var y = 0; y < image.height; y++) {
+      for (var x = 0; x < image.width; x++) {
+        final value = image.getPixel(x, y);
+        final color = Color(value);
+        final dx = x * radius * 2;
+        final dy = y * radius * 2;
+        final c = Offset(dx, dy);
+        paint.color =
+            Color.fromARGB(color.alpha, color.blue, color.green, color.red);
+        //canvas.drawCircle(c, radius, paint);
+        final rect =
+            Rect.fromCenter(center: c, width: step / 2.0, height: step / 2.0);
+        canvas.drawRect(rect, paint);
+      }
+    }
+    canvas.restore();
   }
 }
 
@@ -1265,8 +1656,14 @@ class Sprite {
   Sprite(this.position, this.offset, this.rotation, this.alpha);
 }
 
-Future<ui.Image> loadImageFromAssetsAsync(String path) async {
+Future<ui.Image> loadImage1Async(String path) async {
   final data = await rootBundle.load(path);
   final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
   return decodeImageFromList(bytes);
+}
+
+Future<im.Image> loadImage2Async(String path) async {
+  final data = await rootBundle.load(path);
+  final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+  return im.decodeImage(bytes)!;
 }

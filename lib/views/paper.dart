@@ -41,7 +41,7 @@ class _PaperState extends State<Paper> with SingleTickerProviderStateMixin {
     return Container(
       color: Colors.white,
       child: FutureBuilder(
-        future: loadImage2Async('images/xiaoice.jpg'),
+        future: loadImage2Async('images/qrcode.png'),
         builder: (context, AsyncSnapshot<im.Image> snapshot) => snapshot.hasData
             ? CustomPaint(painter: Image2Painter(snapshot.data!))
             : CustomPaint(painter: SimplePainter(controller!)),
@@ -1597,9 +1597,9 @@ class Image2Painter extends CustomPainter {
   @override
   void paint(ui.Canvas canvas, ui.Size size) {
     canvas.center(size);
-    canvas.drawGrids(size);
-    canvas.drawAxis(size);
-    canvas.drawMarks(size);
+    //canvas.drawGrids(size);
+    //canvas.drawAxis(size);
+    //canvas.drawMarks(size);
     //drawImageColor(canvas);
     drawImagePixelCircles(canvas);
   }
@@ -1623,7 +1623,7 @@ extension Image2X1 on Image2Painter {
   }
 
   void drawImagePixelCircles(Canvas canvas) {
-    final step = 8.0;
+    final step = 20.0;
     final radius = step / 2.0;
     final paint = Paint()..style = PaintingStyle.fill;
     canvas.save();
@@ -1632,15 +1632,15 @@ extension Image2X1 on Image2Painter {
       for (var x = 0; x < image.width; x++) {
         final value = image.getPixel(x, y);
         final color = Color(value);
-        final dx = x * radius * 2;
-        final dy = y * radius * 2;
+        final dx = x * step;
+        final dy = y * step;
         final c = Offset(dx, dy);
         paint.color =
             Color.fromARGB(color.alpha, color.blue, color.green, color.red);
-        //canvas.drawCircle(c, radius, paint);
-        final rect =
-            Rect.fromCenter(center: c, width: step / 2.0, height: step / 2.0);
-        canvas.drawRect(rect, paint);
+        canvas.drawCircle(c, radius, paint);
+        // final rect =
+        //     Rect.fromCenter(center: c, width: step / 2.0, height: step / 2.0);
+        // canvas.drawRect(rect, paint);
       }
     }
     canvas.restore();
